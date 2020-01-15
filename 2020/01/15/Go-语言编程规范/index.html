@@ -54,7 +54,7 @@
 <meta property="og:description" content="Go 语言编程规范 本文翻译自 Uber 在 github 上面开源的 Go 语言编程规范了，原文在这里：&lt;https:&#x2F;&#x2F;github.com&#x2F;uber-go&#x2F;guide&#x2F;blob&#x2F;master&#x2F;style.md&gt;  1. 介绍英文原文标题是 Uber Go Style Guide ，这里的 Style 是指在管理我们代码的时候可以遵从的一些约定。 这篇编程指南的初衷是更好的管理我们">
 <meta property="og:locale" content="cn">
 <meta property="article:published_time" content="2020-01-15T09:07:00.000Z">
-<meta property="article:modified_time" content="2020-01-15T10:19:35.270Z">
+<meta property="article:modified_time" content="2020-01-15T10:36:24.937Z">
 <meta property="article:author" content="ChenWB">
 <meta property="article:tag" content="Golang">
 <meta name="twitter:card" content="summary">
@@ -195,7 +195,7 @@
               <span class="post-meta-item-text">Veröffentlicht am</span>
               
 
-              <time title="Erstellt: 2020-01-15 17:07:00 / Geändert am: 18:19:35" itemprop="dateCreated datePublished" datetime="2020-01-15T17:07:00+08:00">2020-01-15</time>
+              <time title="Erstellt: 2020-01-15 17:07:00 / Geändert am: 18:36:24" itemprop="dateCreated datePublished" datetime="2020-01-15T17:07:00+08:00">2020-01-15</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -243,9 +243,31 @@
 </ul>
 <p>如果你想要修改底层的数据，那么你只能使用 pointer。</p>
 <h4 id="2-2-Receiver-和-Interface"><a href="#2-2-Receiver-和-Interface" class="headerlink" title="2.2 Receiver 和 Interface"></a>2.2 Receiver 和 Interface</h4><p>使用值作为 receiver 的时候 method 可以通过指针调用，也可以通过值来调用。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> S <span class="keyword">struct</span> &#123;  </span><br><span class="line">  data <span class="keyword">string</span>  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s S)</span> <span class="title">Read</span><span class="params">()</span> <span class="title">string</span></span> &#123;  </span><br><span class="line">  <span class="keyword">return</span> s.data  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *S)</span> <span class="title">Write</span><span class="params">(str <span class="keyword">string</span>)</span></span> &#123;  </span><br><span class="line">  s.data = str  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line">sVals := <span class="keyword">map</span>[<span class="keyword">int</span>]S&#123;<span class="number">1</span>: &#123;<span class="string">"A"</span>&#125;&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">// You can only call Read using a value  </span></span><br><span class="line">sVals[<span class="number">1</span>].Read()  </span><br><span class="line">  </span><br><span class="line"><span class="comment">// This will not compile:  </span></span><br><span class="line"><span class="comment">//  sVals[1].Write("test")  </span></span><br><span class="line">  </span><br><span class="line">sPtrs := <span class="keyword">map</span>[<span class="keyword">int</span>]*S&#123;<span class="number">1</span>: &#123;<span class="string">"A"</span>&#125;&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">// You can call both Read and Write using a pointer  </span></span><br><span class="line">sPtrs[<span class="number">1</span>].Read()  </span><br><span class="line">sPtrs[<span class="number">1</span>].Write(<span class="string">"test"</span>)</span><br></pre></td></tr></table></figure>
+<pre><code>type S struct {  
+  data string  
+}  
 
-<p>相似的，pointer 也可以满足 interface 的要求，尽管 method 使用 value 作为 receiver。</p>
+func (s S) Read() string {  
+  return s.data  
+}  
+
+func (s *S) Write(str string) {  
+  s.data = str  
+}  
+
+sVals := map[int]S{1: {&quot;A&quot;}}  
+
+// You can only call Read using a value  
+sVals[1].Read()  
+
+// This will not compile:  
+//  sVals[1].Write(&quot;test&quot;)  
+
+sPtrs := map[int]*S{1: {&quot;A&quot;}}  
+
+// You can call both Read and Write using a pointer  
+sPtrs[1].Read()  
+sPtrs[1].Write(&quot;test&quot;)  </code></pre><p>相似的，pointer 也可以满足 interface 的要求，尽管 method 使用 value 作为 receiver。</p>
 <pre><code>type F interface {  
   f()  
 }  
